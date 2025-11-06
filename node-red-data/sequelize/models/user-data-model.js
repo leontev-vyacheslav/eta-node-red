@@ -3,20 +3,21 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class UserDataModel extends Model {
 
     static associate(models) {
       // define association here
     }
   }
-  User.init({
+  UserDataModel.init({
     name: DataTypes.STRING(32),
-    password: DataTypes.STRING(128)
+    password: DataTypes.STRING(128),
+    roleId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'User',
+    modelName: 'UserDataModel',
     tableName: 'user',
     freezeTableName: true,
   });
-  return User;
+  return UserDataModel;
 };

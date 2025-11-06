@@ -1,7 +1,7 @@
-GET http://127.0.0.1:1880/api/get-state/2
+GET http://127.0.0.1:1880/api/get-state/1
 
 ###
-GET http://127.0.0.1:1880/api/get-states-by-dates/1?beginDate=2025-10-01&endDate=2025-10-30
+GET http://127.0.0.1:1880/api/get-states-by-dates/1?beginDate=2025-10-31T00:00:00&endDate=2025-10-31T23:59:59
 
 ###
 POST http://127.0.0.1:1880/api/set-state/3  HTTP/1.1
@@ -10,4 +10,18 @@ content-type: application/json
 {
     "address": 7,
     "value": true
+}
+
+###
+GET http://127.0.0.1:1880/api/get-devices
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOjEsImlhdCI6MTc2MjQzNzQ2MiwiZXhwIjoxNzYyNTIzODYyfQ.NSobDlPSzwEuisvqEeB6QfLusqtxt1Afdr6y00vp3Y4
+
+
+###
+POST  http://127.0.0.1:1880/auth/login
+content-type: application/json
+
+{
+    "name": "leo",
+    "password": "0987654321"
 }

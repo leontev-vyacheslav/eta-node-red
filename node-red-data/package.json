@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "@node-red-contrib-themes/theme-collection": "~4.1.0",
+        "jsonwebtoken": "^9.0.2",
         "node-red-contrib-modbus": "~5.44.1",
         "pg": "^8.16.3",
         "sequelize": "^6.37.7"

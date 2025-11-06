@@ -4,24 +4,25 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class DeviceState extends Model {
+  class DeviceStateDataModel extends Model {
 
     static associate(models) {
-      DeviceState.belongsTo(models.Device, { foreignKey: 'deviceId', as: 'device' });
+      DeviceStateDataModel.belongsTo(models.DeviceDataModel, { foreignKey: 'deviceId', as: 'device' });
     }
   }
-  DeviceState.init({
+  
+  DeviceStateDataModel.init({
     deviceId: DataTypes.INTEGER,
     state: DataTypes.JSON,
   }, {
     sequelize,
-    modelName: 'DeviceState',
+    modelName: 'DeviceStateDataModel',
     tableName: 'device_state',
     freezeTableName: true,
   });
 
 
 
-  return Device;
+  return DeviceStateDataModel;
 };
 

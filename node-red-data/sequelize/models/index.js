@@ -6,8 +6,16 @@ const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
+
 const config = require(__dirname + '/../config/database.json')[env];
 const db = {};
+
+const kebabToPascal = (str) =>
+  str ? str
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('')
+    : '';
 
 let sequelize;
 if (config.use_env_variable) {
@@ -28,7 +36,8 @@ fs
   })
   .forEach(file => {
     const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
+    const modelName = kebabToPascal(model.name);
+    db[modelName] = model;
   });
 
 Object.keys(db).forEach(modelName => {

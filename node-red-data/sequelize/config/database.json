@@ -7,20 +7,12 @@
     "port": 35432,
     "dialect": "postgres"
   },
-  "test": {
-    "username": "postgres",
-    "password": "0987654321",
-    "database": "eta_nodered_db",
-    "host": "localhost",
-    "port": 35432,
-    "dialect": "postgres"
-  },
   "production": {
     "username": "postgres",
     "password": "0987654321",
     "database": "eta_nodered_db",
-    "host": "localhost",
-    "port": 35432,
+    "host": "node-red-database",
+    "port": 5432,
     "dialect": "postgres"
   }
 }

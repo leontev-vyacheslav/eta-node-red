@@ -19,17 +19,36 @@
  *  - Node Settings
  *
  **/
+process.env.NODE_ENV = 'production';
+process.env.JWT_SECRET = '5840ff8778d33ae4eb010e0c83e1fb25d7ca0ded9119293b4911964744c8b2fa635a66f7c35fe4c1b775f8512d6c9519b08b78863b1d9a0f59861f791b498271';
+
+const http = require('http');
+const jsonwebtoken = require('jsonwebtoken');
+const db = require('./sequelize/models');
+
+http.HttpStatusCode = {
+    OK: 200,
+    Created: 201,
+    NoContent: 204,
+    BadRequest: 400,
+    Unauthorized: 401,
+    Forbidden: 403,
+    NotFound: 404,
+    Conflict: 409,
+    InternalServerError: 500,
+    ServiceUnavailable: 503
+};
 
 module.exports = {
 
-/*******************************************************************************
- * Flow File and User Directory Settings
- *  - flowFile
- *  - credentialSecret
- *  - flowFilePretty
- *  - userDir
- *  - nodesDir
- ******************************************************************************/
+    /*******************************************************************************
+     * Flow File and User Directory Settings
+     *  - flowFile
+     *  - credentialSecret
+     *  - flowFilePretty
+     *  - userDir
+     *  - nodesDir
+     ******************************************************************************/
 
     /** The file containing the flows. If not set, defaults to flows_<hostname>.json **/
     flowFile: 'flows.json',
@@ -60,15 +79,15 @@ module.exports = {
      */
     //nodesDir: '/home/nol/.node-red/nodes',
 
-/*******************************************************************************
- * Security
- *  - adminAuth
- *  - https
- *  - httpsRefreshInterval
- *  - requireHttps
- *  - httpNodeAuth
- *  - httpStaticAuth
- ******************************************************************************/
+    /*******************************************************************************
+     * Security
+     *  - adminAuth
+     *  - https
+     *  - httpsRefreshInterval
+     *  - requireHttps
+     *  - httpNodeAuth
+     *  - httpStaticAuth
+     ******************************************************************************/
 
     /** To password protect the Node-RED editor and admin API, the following
      * property can be used. See https://nodered.org/docs/security.html for details.
@@ -125,22 +144,22 @@ module.exports = {
     //httpNodeAuth: {user:"user",pass:"$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN."},
     //httpStaticAuth: {user:"user",pass:"$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN."},
 
-/*******************************************************************************
- * Server Settings
- *  - uiPort
- *  - uiHost
- *  - apiMaxLength
- *  - httpServerOptions
- *  - httpAdminRoot
- *  - httpAdminMiddleware
- *  - httpAdminCookieOptions
- *  - httpNodeRoot
- *  - httpNodeCors
- *  - httpNodeMiddleware
- *  - httpStatic
- *  - httpStaticRoot
- *  - httpStaticCors
- ******************************************************************************/
+    /*******************************************************************************
+     * Server Settings
+     *  - uiPort
+     *  - uiHost
+     *  - apiMaxLength
+     *  - httpServerOptions
+     *  - httpAdminRoot
+     *  - httpAdminMiddleware
+     *  - httpAdminCookieOptions
+     *  - httpNodeRoot
+     *  - httpNodeCors
+     *  - httpNodeMiddleware
+     *  - httpStatic
+     *  - httpStaticRoot
+     *  - httpStaticCors
+     ******************************************************************************/
 
     /** the tcp port that the Node-RED web server is listening on */
     uiPort: process.env.PORT || 1880,
@@ -199,8 +218,8 @@ module.exports = {
      * details on its contents. The following is a basic permissive set of options:
      */
     httpNodeCors: {
-       origin: "*",
-       methods: "GET,PUT,POST,DELETE"
+        origin: "*",
+        methods: "GET,PUT,POST,DELETE"
     },
 
     /** If you need to set an http proxy please set an environment variable
@@ -216,12 +235,37 @@ module.exports = {
      * applied to all http in nodes, or any other sort of common request processing.
      * It can be a single function or an array of middleware functions.
      */
-    //httpNodeMiddleware: function(req,res,next) {
-    //    // Handle/reject the request, or pass it on to the http in node by calling next();
-    //    // Optionally skip our rawBodyParser by setting this to true;
-    //    //req.skipRawBodyParser = true;
-    //    next();
-    //},
+    httpNodeMiddleware: function (req, res, next) {
+        // Optionally skip our rawBodyParser by setting this to true;
+        //req.skipRawBodyParser = true;
+
+        if (req.path === '/auth/login') {
+            next();
+
+            return;
+        }
+
+        const token = req.headers.authorization?.replace('Bearer ', '');
+
+        if (!token) {
+            return res
+                .status(http.HttpStatusCode.Unauthorized)
+                .json({ error: 'The authorization token wasn\'t found.' });
+        }
+
+        try {
+            const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+            console.log(decoded);
+
+            req.user = decoded;
+
+            return next();
+        } catch (err) {
+            return res
+                .status(http.HttpStatusCode.Unauthorized)
+                .json({ error: 'The authorization token is invalid.' });
+        }
+    },
 
     /** When httpAdminRoot is used to move the UI to a different root path, the
      * following property can be used to identify a directory of static content
@@ -269,17 +313,17 @@ module.exports = {
     //     mode: "legacy", // legacy mode is for non-strict previous proxy determination logic (node-red < v4 compatible)
     // },
 
-/*******************************************************************************
- * Runtime Settings
- *  - lang
- *  - runtimeState
- *  - telemetry
- *  - diagnostics
- *  - logging
- *  - contextStorage
- *  - exportGlobalContextKeys
- *  - externalModules
- ******************************************************************************/
+    /*******************************************************************************
+     * Runtime Settings
+     *  - lang
+     *  - runtimeState
+     *  - telemetry
+     *  - diagnostics
+     *  - logging
+     *  - contextStorage
+     *  - exportGlobalContextKeys
+     *  - externalModules
+     ******************************************************************************/
 
     /** Uncomment the following to run node-red in your preferred language.
      * Available languages include: en-US (default), ja, de, zh-CN, zh-TW, ru, ko
@@ -308,9 +352,9 @@ module.exports = {
      */
     runtimeState: {
         /** enable or disable flows/state endpoint. Must be set to `false` to disable */
-        enabled: false,
+        enabled: true,
         /** show or hide runtime stop/start options in the node-red editor. Must be set to `false` to hide */
-        ui: false,
+        ui: true,
     },
     telemetry: {
         /**
@@ -398,11 +442,11 @@ module.exports = {
     },
 
 
-/*******************************************************************************
- * Editor Settings
- *  - disableEditor
- *  - editorTheme
- ******************************************************************************/
+    /*******************************************************************************
+     * Editor Settings
+     *  - disableEditor
+     *  - editorTheme
+     ******************************************************************************/
 
     /** The following property can be used to disable the editor. The admin API
      * is not affected by this option. To disable both the editor and the admin
@@ -485,29 +529,29 @@ module.exports = {
         },
     },
 
-/*******************************************************************************
- * Node Settings
- *  - fileWorkingDirectory
- *  - functionGlobalContext
- *  - functionExternalModules
- *  - globalFunctionTimeout
- *  - functionTimeout
- *  - nodeMessageBufferMaxLength
- *  - ui (for use with Node-RED Dashboard)
- *  - debugUseColors
- *  - debugMaxLength
- *  - debugStatusLength
- *  - execMaxBufferSize
- *  - httpRequestTimeout
- *  - mqttReconnectTime
- *  - serialReconnectTime
- *  - socketReconnectTime
- *  - socketTimeout
- *  - tcpMsgQueueSize
- *  - inboundWebSocketTimeout
- *  - tlsConfigDisableLocalFiles
- *  - webSocketNodeVerifyClient
- ******************************************************************************/
+    /*******************************************************************************
+     * Node Settings
+     *  - fileWorkingDirectory
+     *  - functionGlobalContext
+     *  - functionExternalModules
+     *  - globalFunctionTimeout
+     *  - functionTimeout
+     *  - nodeMessageBufferMaxLength
+     *  - ui (for use with Node-RED Dashboard)
+     *  - debugUseColors
+     *  - debugMaxLength
+     *  - debugStatusLength
+     *  - execMaxBufferSize
+     *  - httpRequestTimeout
+     *  - mqttReconnectTime
+     *  - serialReconnectTime
+     *  - socketReconnectTime
+     *  - socketTimeout
+     *  - tcpMsgQueueSize
+     *  - inboundWebSocketTimeout
+     *  - tlsConfigDisableLocalFiles
+     *  - webSocketNodeVerifyClient
+     ******************************************************************************/
 
     /** The working directory to handle relative file paths from within the File nodes
      * defaults to the working directory of the Node-RED process.
@@ -540,9 +584,12 @@ module.exports = {
      *    global.get("os")
      */
     functionGlobalContext: {
-        sequelize: require('sequelize')
+        db: db,
+        sequelize: require('sequelize'),
+        crypto: require('crypto'),
+        jsonwebtoken: jsonwebtoken,
+        http: http
     },
-
 
     /** The maximum number of messages nodes will buffer internally as part of their
      * operation. This applies across a range of nodes that operate on message sequences.

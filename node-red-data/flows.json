@@ -1,5 +1,13 @@
 [
     {
+        "id": "2dca6eed12b296f5",
+        "type": "tab",
+        "label": "eta-flow-web-api",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "a7c135e772de0725",
         "type": "tab",
         "label": "eta-sewage-pump-monitor",
@@ -28,12 +36,15 @@
             "912ffc3a037d746c",
             "b9800d78b27085a5",
             "4bd9a2b7d2c29a19",
-            "6af9f793cbe7d0bf"
+            "6af9f793cbe7d0bf",
+            "323402e3df4b64bc",
+            "5cb3165ea305cfd7",
+            "8a71ccaa19f8d878"
         ],
         "x": 34,
         "y": 739,
         "w": 812,
-        "h": 342
+        "h": 422
     },
     {
         "id": "32c193548f01777e",
@@ -93,8 +104,26 @@
             "abf540bef0e1bad8"
         ],
         "x": 34,
-        "y": 579,
+        "y": 459,
         "w": 472,
+        "h": 82
+    },
+    {
+        "id": "7f7a985047e86ceb",
+        "type": "group",
+        "z": "a7c135e772de0725",
+        "name": "realtime-ui-communicator",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "3a29c46091b22441",
+            "6b9c30909788b5bf",
+            "4d65ff37e6d2771a"
+        ],
+        "x": 34,
+        "y": 599,
+        "w": 622,
         "h": 82
     },
     {
@@ -128,6 +157,61 @@
         "showLogs": true
     },
     {
+        "id": "01aaea51ef13314e",
+        "type": "websocket-listener",
+        "path": "ws/a7c135e772de0725",
+        "wholemsg": "false"
+    },
+    {
+        "id": "cc420d657eea3b6f",
+        "type": "http in",
+        "z": "2dca6eed12b296f5",
+        "name": "",
+        "url": "/auth/login",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 220,
+        "y": 100,
+        "wires": [
+            [
+                "7fedb0406dc884b3"
+            ]
+        ]
+    },
+    {
+        "id": "7fedb0406dc884b3",
+        "type": "function",
+        "z": "2dca6eed12b296f5",
+        "name": "signIn",
+        "func": "const [http, jwt, { createHash }, { UserDataModel }] = global.get([\"http\", \"jsonwebtoken\", \"crypto\", \"db\"]);\nconst { name, password } = msg.payload;\n\nconst hashedPassword = createHash(\"sha256\").update(password).digest(\"base64\");\n\nconst user = await UserDataModel.findOne({\n    where: {\n        name: name,\n        password: hashedPassword\n    }\n});\n\nif (!user) {\n    msg.statusCode = http.HttpStatusCode.Unauthorized;\n    msg.payload = { error: \"The user wasn't found.\" }\n\n    return msg;\n}\n\nconst JWT_SECRET = env.get('JWT_SECRET');\nif (!JWT_SECRET) {\n    msg.statusCode = http.HttpStatusCode.Forbiden;\n    msg.payload = { error: \"JWT_SECRET wasn't found.\" }\n\n    return msg;\n}\n\nconst token = jwt.sign(\n    { userId: user.id, role: user.roleId },\n    JWT_SECRET,\n    { expiresIn: '24h' }\n);\n\nmsg.statusCode = http.HttpStatusCode.OK;\nmsg.payload = {\n    token,\n    user: {\n        id: user.id,\n        name: user.name,\n        roleId: user.roleId\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 100,
+        "wires": [
+            [
+                "281282e423102908"
+            ]
+        ]
+    },
+    {
+        "id": "281282e423102908",
+        "type": "http response",
+        "z": "2dca6eed12b296f5",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 710,
+        "y": 100,
+        "wires": []
+    },
+    {
         "id": "74479dcb06e8145c",
         "type": "http in",
         "z": "a7c135e772de0725",
@@ -152,7 +236,7 @@
         "z": "a7c135e772de0725",
         "g": "3824f75aea35a698",
         "name": "getStates",
-        "func": "const deviceId = msg.req.params.deviceId;\nnode.warn(deviceId);\nconst state = flow.get(`state${deviceId}`);\nmsg.payload = { values: state };\n\nreturn msg;\n",
+        "func": "const deviceId = msg.req.params.deviceId;\nconst state = flow.get(`state${deviceId}`);\n\nmsg.payload = { values: state };\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -226,7 +310,7 @@
         "z": "a7c135e772de0725",
         "g": "32c193548f01777e",
         "name": "initState",
-        "func": "const { Sequelize, DataTypes } = global.get('sequelize');\n\nlet sequelize = flow.get('sequelize');\nif (!sequelize) {\n    sequelize = new Sequelize('postgres://postgres:0987654321@node-red-database:5432/eta_nodered_db');\n    flow.set('sequelize', sequelize);\n}\n\n\n\nconst DeviceDataModel = sequelize.define('Device', {\n    name: DataTypes.STRING(32),\n    flowId: DataTypes.INTEGER,\n    settings: DataTypes.JSON,\n    createdAt: DataTypes.DATE,\n    updatedAt: DataTypes.DATE,\n}, {\n    tableName: 'device',\n});\n\nconst DeviceStateDataModel = sequelize.define('DeviceState', {\n    deviceId: DataTypes.INTEGER,\n    state: DataTypes.STRING,\n    createdAt: DataTypes.DATE,\n    updatedAt: DataTypes.DATE,\n}, {\n    tableName: 'device_state',\n});\nflow.set([\"DeviceDataModel\", \"DeviceStateDataModel\"], [DeviceDataModel, DeviceStateDataModel]);\n\nconst params = [\n    [\n        \"startStop\", \"lowLevel\", \"midLevel\",\n        \"hiLevel\", \"emergencyLevel\", \"statePump1\",\n        \"statePump2\", \"resetFaultPump1\", \"resetFaultPump2\",\n        \"resetOperatingTimePump1\", \"resetOperatingTimePump2\",\n        \"faultPump1\", \"faultPump2\"\n    ],\n    [\n        \"timePump1\",\n        \"timePump2\"\n    ]\n];\nconst initialState = {};\n\nflow.set([\"coilsParams\", \"holdingsParams\"], params);\n\nconst devices = await DeviceDataModel.findAll();\n\ndevices.forEach(d => {\n    \n    params.forEach(params => {\n        params.forEach((p, i) => {\n            initialState[p] = undefined;\n        });\n    });\n\n    // initialState[\"deviceId\"] = d.id;\n    \n    flow.set(`state${d.id}`, initialState);\n    node.warn(initialState);\n});\n\n\n\nmsg.payload = { message: \"OnInit was completed.\" }\n\nreturn msg;",
+        "func": "const { Op } = global.get('sequelize');\nconst { FlowDataModel, DeviceDataModel } = global.get(\"db\");\nconst flowUid = node.path.split('/').find(_=> true);\n\nconst params = [\n    [\n        \"startStop\", \"lowLevel\", \"midLevel\",\n        \"hiLevel\", \"emergencyLevel\", \"statePump1\",\n        \"statePump2\", \"resetFaultPump1\", \"resetFaultPump2\",\n        \"resetOperatingTimePump1\", \"resetOperatingTimePump2\",\n        \"faultPump1\", \"faultPump2\"\n    ],\n    [\n        \"timePump1\",\n        \"timePump2\"\n    ]\n];\nconst initialState = {};\n\nflow.set([\"coilsParams\", \"holdingsParams\"], params);\n\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\ndevices.forEach(d => {\n    params.forEach(params => {\n        params.forEach((p, i) => {\n            initialState[p] = undefined;\n        });\n    });\n    \n    flow.set(`state${d.id}`, initialState);\n});\n\nmsg.payload = { message: \"OnInit was completed.\" }\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -284,7 +368,7 @@
         "z": "a7c135e772de0725",
         "g": "3824f75aea35a698",
         "name": "getStatesByDates",
-        "func": "const { Op } = global.get(\"sequelize\");\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = msg.req.params.deviceId;\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst DeviceStateDataModel = flow.get(\"DeviceStateDataModel\");\n\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
+        "func": "const { Op } = global.get(\"sequelize\");\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = msg.req.params.deviceId;\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst { DeviceStateDataModel } = global.get(\"db\");\n\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -379,7 +463,7 @@
         "links": [
             "912ffc3a037d746c"
         ],
-        "x": 95,
+        "x": 75,
         "y": 380,
         "wires": [
             [
@@ -411,7 +495,7 @@
         "links": [
             "4bd9a2b7d2c29a19"
         ],
-        "x": 845,
+        "x": 825,
         "y": 380,
         "wires": []
     },
@@ -458,7 +542,7 @@
         "keepMsgProperties": false,
         "delayOnStart": false,
         "startDelayTime": "",
-        "x": 670,
+        "x": 650,
         "y": 380,
         "wires": [
             [
@@ -524,7 +608,7 @@
         "z": "a7c135e772de0725",
         "g": "ebdda297932f3f07",
         "name": "switchDeviceConnection",
-        "func": "\nconst DeviceDataModel = flow.get(\"DeviceDataModel\");\nconst devices = await DeviceDataModel.findAll();\nlet deviceIndex = flow.get(\"deviceIndex\") || 0;\n\nif (deviceIndex >= devices.length) {\n    deviceIndex = 0;\n};\n\n\nconst device = devices[deviceIndex];\n\n\nmsg.payload = {\n    connectorType: 'TCP',\n    tcpHost: device.settings.ip,\n    tcpPort: device.settings.port,\n    unitId: 1,\n};\nmsg.deviceId = device.id;\n\nflow.set(\"deviceIndex\", deviceIndex + 1);\nflow.set(\"deviceId\", device.id);\n\nreturn msg;",
+        "func": "const { Op } = global.get('sequelize');\nconst { FlowDataModel, DeviceDataModel } = global.get(\"db\");\nconst flowUid = node.path.split('/').find(_=> true);\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id', 'settings'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\nlet deviceIndex = flow.get(\"deviceIndex\") || 0;\n\nif (deviceIndex >= devices.length) {\n    deviceIndex = 0;\n};\n\n\nconst device = devices[deviceIndex];\n\nif (device) {\n    msg.payload = {\n        connectorType: 'TCP',\n        tcpHost: device.settings.ip,\n        tcpPort: device.settings.port,\n        unitId: 1,\n    };\n    msg.deviceId = device.id;\n\n\n    flow.set(\"deviceIndex\", deviceIndex + 1);\n    flow.set(\"deviceId\", device.id);\n}\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -553,18 +637,20 @@
         "useIOFile": false,
         "ioFile": "",
         "useIOForPayload": false,
-        "emptyMsgOnFail": false,
+        "emptyMsgOnFail": true,
         "keepMsgProperties": true,
         "delayOnStart": false,
         "enableDeformedMessages": false,
         "startDelayTime": "",
-        "x": 630,
+        "x": 650,
         "y": 300,
         "wires": [
             [
                 "bfb3e9ec73ddd77c"
             ],
-            []
+            [
+                "bfe62a470c64a909"
+            ]
         ]
     },
     {
@@ -573,14 +659,14 @@
         "z": "a7c135e772de0725",
         "g": "ebdda297932f3f07",
         "name": "collectDeviceState",
-        "func": "\nconst deviceId = flow.get(\"deviceId\");\n\nif (!deviceId) {\n    return;\n}\n\nlet state = flow.get(`state${deviceId}`);\n\nconst updateState = (params) => {\n    params.forEach((p, i) => {\n        const v = {};\n        v[p] = msg.payload[i];\n        state = { ...state, ...v };\n    });\n}\n\nif (msg.topic) {\n    const params = flow.get(`${msg.topic}Params`);\n    updateState(params);\n}\n// state[\"deviceId\"] = deviceId;\nflow.set(`state${deviceId}`, state);\n\n\n\nreturn state;",
+        "func": "\nconst deviceId = flow.get(\"deviceId\");\n\nif (!deviceId) {\n    return;\n}\n\nlet state = flow.get(`state${deviceId}`);\n\nconst updateState = (params) => {\n    params.forEach((p, i) => {\n        const v = {};\n        v[p] = msg.payload[i];\n        state = { ...state, ...v };\n    });\n}\n\nif (msg.topic) {\n    const params = flow.get(`${msg.topic}Params`);\n    updateState(params);\n}\nflow.set(`state${deviceId}`, state);\n\nreturn state;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 850,
+        "x": 870,
         "y": 300,
         "wires": [
             [
@@ -594,7 +680,7 @@
         "z": "a7c135e772de0725",
         "g": "b74b1a6d538c13c2",
         "name": "postDeviceState",
-        "func": "const DeviceStateDataModel = flow.get(\"DeviceStateDataModel\");\nconst DeviceDataModel = flow.get(\"DeviceDataModel\");\n\nconst devices = await DeviceDataModel.findAll();\n\n\ndevices.forEach(async (d) => {\n    const state = flow.get(`state${d.id}`);\n    \n    await DeviceStateDataModel.create({\n        deviceId: d.id,\n        state: JSON.stringify(state)\n    });\n});\n\n\nreturn msg;",
+        "func": "const { Op } = global.get('sequelize');\nconst { FlowDataModel, DeviceDataModel, DeviceStateDataModel } = global.get(\"db\");\nconst flowUid = node.path.split('/').find(_ => true);\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\n\ndevices.forEach(async (d) => {\n    const state = flow.get(`state${d.id}`);\n\n    await DeviceStateDataModel.create({\n        deviceId: d.id,\n        state: JSON.stringify(state)\n    });\n});\n\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -602,7 +688,7 @@
         "finalize": "",
         "libs": [],
         "x": 400,
-        "y": 620,
+        "y": 500,
         "wires": [
             []
         ]
@@ -630,7 +716,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 150,
-        "y": 620,
+        "y": 500,
         "wires": [
             [
                 "443b413283d10c89"
@@ -680,7 +766,7 @@
         "z": "a7c135e772de0725",
         "g": "ebdda297932f3f07",
         "name": "switchReadingRegisters",
-        "func": "\nconst registers = [\n    { name: \"coils\", address: 0, fc: 1, quantity: 13 },\n    { name: \"holdings\", address: 0, fc: 3, quantity: 2 },\n];\n\nlet registerIndex = flow.get(\"registerIndex\") || 0;\n\nif (registerIndex >= registers.length) {\n    registerIndex = 0;\n}\n\nconst register = registers[registerIndex];\n\n\nmsg.payload = {\n    fc: register.fc,\n    address: register.address,\n    quantity: register.quantity,\n};\n\nmsg.topic = register.name;\n\nflow.set(\"registerIndex\", registerIndex + 1);\n\n\nreturn msg;\n",
+        "func": "\nconst registers = [\n    { name: \"coils\", address: 0, fc: 1, quantity: 13 },\n    { name: \"holdings\", address: 0, fc: 3, quantity: 2 },\n];\n\nlet registerIndex = flow.get(\"registerIndex\") || 0;\n\nif (registerIndex >= registers.length) {\n    registerIndex = 0;\n}\n\nconst register = registers[registerIndex];\n\nmsg.payload = {\n    fc: register.fc,\n    address: register.address,\n    quantity: register.quantity,\n};\n\nmsg.topic = register.name;\n\nflow.set(\"registerIndex\", registerIndex + 1);\n\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -724,5 +810,138 @@
                 "30f6276f9e368846"
             ]
         ]
+    },
+    {
+        "id": "3a29c46091b22441",
+        "type": "websocket out",
+        "z": "a7c135e772de0725",
+        "g": "7f7a985047e86ceb",
+        "name": "",
+        "server": "01aaea51ef13314e",
+        "client": "",
+        "x": 510,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "6b9c30909788b5bf",
+        "type": "function",
+        "z": "a7c135e772de0725",
+        "g": "7f7a985047e86ceb",
+        "name": "sendDeviceState",
+        "func": "const deviceIndex = flow.get(\"deviceIndex\") || 0;\nconst deviceId = flow.get(\"deviceId\");\nconst state = flow.get(`state${deviceIndex}`);\n\nmsg.payload = {\n    type: \"state\",\n    timestamp: new Date().toISOString(),\n    deviceId: deviceId,\n    value: state,\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 640,
+        "wires": [
+            [
+                "3a29c46091b22441"
+            ]
+        ]
+    },
+    {
+        "id": "4d65ff37e6d2771a",
+        "type": "inject",
+        "z": "a7c135e772de0725",
+        "g": "7f7a985047e86ceb",
+        "name": "setInterval5sec",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 95,
+        "y": 640,
+        "wires": [
+            [
+                "6b9c30909788b5bf"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "323402e3df4b64bc",
+        "type": "http in",
+        "z": "a7c135e772de0725",
+        "g": "3824f75aea35a698",
+        "name": "",
+        "url": "/api/get-devices",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 1120,
+        "wires": [
+            [
+                "5cb3165ea305cfd7"
+            ]
+        ]
+    },
+    {
+        "id": "5cb3165ea305cfd7",
+        "type": "function",
+        "z": "a7c135e772de0725",
+        "g": "3824f75aea35a698",
+        "name": "getDevices",
+        "func": "const { Op } = global.get('sequelize');\nconst { DeviceDataModel, FlowDataModel } = global.get(\"db\");\nconst flowUid = node.path.split('/').find(_=> true);\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id', 'name'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\nmsg.payload = { values: devices };\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 1120,
+        "wires": [
+            [
+                "8a71ccaa19f8d878"
+            ]
+        ]
+    },
+    {
+        "id": "8a71ccaa19f8d878",
+        "type": "http response",
+        "z": "a7c135e772de0725",
+        "g": "3824f75aea35a698",
+        "name": "http-get-devices-response",
+        "statusCode": "",
+        "headers": {},
+        "x": 570,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "bfe62a470c64a909",
+        "type": "debug",
+        "z": "a7c135e772de0725",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 120,
+        "wires": []
     }
 ]
