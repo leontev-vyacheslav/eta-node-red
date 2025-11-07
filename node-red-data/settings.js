@@ -546,7 +546,7 @@ module.exports = {
         jsonwebtoken: require('jsonwebtoken'),
 
         constants: require('./src/constants'),
-        db: require('./src/sequelize/models'),
+        orm: require('./src/orm/models'),
     },
 
     /** The maximum number of messages nodes will buffer internally as part of their
