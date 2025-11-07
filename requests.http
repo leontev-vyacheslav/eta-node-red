@@ -18,7 +18,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvb
 
 
 ###
-POST  http://127.0.0.1:1880/auth/login
+POST  http://127.0.0.1:1880/sign-in/
 content-type: application/json
 
 {

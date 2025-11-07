@@ -24,10 +24,6 @@
             "label": true
         },
         "nodes": [
-            "f89e2f3dce998039",
-            "197bb63a4e854458",
-            "fd86f761136a6f0c",
-            "d246a8475b5673ea",
             "54190ad994db7851",
             "912ffc3a037d746c",
             "b9800d78b27085a5",
@@ -35,9 +31,9 @@
             "6af9f793cbe7d0bf"
         ],
         "x": 34,
-        "y": 859,
+        "y": 999,
         "w": 812,
-        "h": 222
+        "h": 82
     },
     {
         "id": "32c193548f01777e",
@@ -85,23 +81,6 @@
         "h": 242
     },
     {
-        "id": "b74b1a6d538c13c2",
-        "type": "group",
-        "z": "a7c135e772de0725",
-        "name": "persistent-storage-manager",
-        "style": {
-            "label": true
-        },
-        "nodes": [
-            "443b413283d10c89",
-            "abf540bef0e1bad8"
-        ],
-        "x": 34,
-        "y": 459,
-        "w": 472,
-        "h": 82
-    },
-    {
         "id": "7f7a985047e86ceb",
         "type": "group",
         "z": "a7c135e772de0725",
@@ -117,6 +96,68 @@
         "x": 34,
         "y": 599,
         "w": 622,
+        "h": 82
+    },
+    {
+        "id": "41c82c569adc9a0c",
+        "type": "group",
+        "z": "2dca6eed12b296f5",
+        "name": "api",
+        "style": {
+            "fill": "none",
+            "label": true
+        },
+        "nodes": [
+            "323402e3df4b64bc",
+            "5cb3165ea305cfd7",
+            "8a71ccaa19f8d878",
+            "74479dcb06e8145c",
+            "be8e1b2521c879ee",
+            "e207d1a66a7650b9",
+            "f89e2f3dce998039",
+            "197bb63a4e854458",
+            "fd86f761136a6f0c",
+            "d246a8475b5673ea"
+        ],
+        "x": 24,
+        "y": 239,
+        "w": 812,
+        "h": 262
+    },
+    {
+        "id": "d4fc72a987396215",
+        "type": "group",
+        "z": "2dca6eed12b296f5",
+        "name": "auth",
+        "style": {
+            "label": true,
+            "fill": "none"
+        },
+        "nodes": [
+            "cc420d657eea3b6f",
+            "7fedb0406dc884b3",
+            "281282e423102908"
+        ],
+        "x": 34,
+        "y": 59,
+        "w": 672,
+        "h": 82
+    },
+    {
+        "id": "b74b1a6d538c13c2",
+        "type": "group",
+        "z": "2dca6eed12b296f5",
+        "name": "device-state-updater",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "443b413283d10c89",
+            "abf540bef0e1bad8"
+        ],
+        "x": 34,
+        "y": 579,
+        "w": 472,
         "h": 82
     },
     {
@@ -159,13 +200,14 @@
         "id": "cc420d657eea3b6f",
         "type": "http in",
         "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
         "name": "",
-        "url": "/auth/login",
+        "url": "/sign-in",
         "method": "post",
         "upload": false,
         "skipBodyParsing": false,
         "swaggerDoc": "",
-        "x": 120,
+        "x": 130,
         "y": 100,
         "wires": [
             [
@@ -177,6 +219,7 @@
         "id": "7fedb0406dc884b3",
         "type": "function",
         "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
         "name": "signIn",
         "func": "const [jwt, { createHash }, { UserDataModel }, { HttpStatusCodes }] = global.get(['jsonwebtoken', 'crypto', 'orm', 'constants']);\nconst { name, password } = msg.payload;\n\nconst hashedPassword = createHash('sha256').update(password).digest('base64');\n\nconst user = await UserDataModel.findOne({\n    where: {\n        name: name,\n        password: hashedPassword\n    }\n});\n\nif (!user) {\n    msg.statusCode = HttpStatusCodes.Unauthorized;\n    msg.payload = { error: 'The user wasn\\'t found or the password was wrong.' }\n\n    return msg;\n}\n\nconst JWT_SECRET = env.get('JWT_SECRET');\nif (!JWT_SECRET) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: 'JWT_SECRET wasn\\'t found.' }\n\n    return msg;\n}\n\nconst token = jwt.sign(\n    { userId: user.id, roleId: user.roleId },\n    JWT_SECRET,\n    { expiresIn: '24h' }\n);\n\nmsg.statusCode = HttpStatusCodes.OK;\nmsg.payload = {\n    token,\n    user: {\n        id: user.id,\n        name: user.name,\n        roleId: user.roleId\n    }\n};\n\nreturn msg;",
         "outputs": 1,
@@ -185,7 +228,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 350,
+        "x": 370,
         "y": 100,
         "wires": [
             [
@@ -197,10 +240,11 @@
         "id": "281282e423102908",
         "type": "http response",
         "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
         "name": "",
         "statusCode": "",
         "headers": {},
-        "x": 610,
+        "x": 630,
         "y": 100,
         "wires": []
     },
@@ -208,14 +252,15 @@
         "id": "323402e3df4b64bc",
         "type": "http in",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "",
         "url": "/api/get-devices",
         "method": "get",
         "upload": false,
         "skipBodyParsing": false,
         "swaggerDoc": "",
-        "x": 130,
-        "y": 200,
+        "x": 140,
+        "y": 280,
         "wires": [
             [
                 "5cb3165ea305cfd7"
@@ -226,6 +271,7 @@
         "id": "5cb3165ea305cfd7",
         "type": "function",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "getDevices",
         "func": "const { DeviceDataModel, FlowDataModel, UserDeviceLinkDataModel } = global.get('orm');\n\nconst { userId } = msg.req.user; \n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id', 'name'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [\"uid\"],\n    }, {\n        model: UserDeviceLinkDataModel,\n        as: 'userDeviceLinks',\n        where: {\n            userId: userId\n        },\n        attributes: [],\n    }]\n});\n\nmsg.payload = { values: devices };\n\nreturn msg;",
         "outputs": 1,
@@ -234,8 +280,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 360,
-        "y": 200,
+        "x": 370,
+        "y": 280,
         "wires": [
             [
                 "8a71ccaa19f8d878"
@@ -246,25 +292,27 @@
         "id": "8a71ccaa19f8d878",
         "type": "http response",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "http-get-devices-response",
         "statusCode": "",
         "headers": {},
-        "x": 590,
-        "y": 200,
+        "x": 600,
+        "y": 280,
         "wires": []
     },
     {
         "id": "74479dcb06e8145c",
         "type": "http in",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "",
         "url": "/api/get-state/:deviceId",
         "method": "get",
         "upload": false,
         "skipBodyParsing": false,
         "swaggerDoc": "",
-        "x": 160,
-        "y": 260,
+        "x": 170,
+        "y": 340,
         "wires": [
             [
                 "be8e1b2521c879ee"
@@ -275,6 +323,7 @@
         "id": "be8e1b2521c879ee",
         "type": "function",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "getDeviceState",
         "func": "const { userId } = msg.req.user;\nconst deviceId = msg.req.params.deviceId;\nconst [{ UserDeviceLinkDataModel }, { HttpStatusCodes }] = global.get(['orm', 'constants']);\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\nconst state = global.get(`state${deviceId}`);\nif (!state) {\n    msg.statusCode = HttpStatusCodes.InternalServerError;\n    msg.payload = { error: `The device state for the device with ID: ${deviceId}) was'n found` }\n\n    return msg;\n}\n\nmsg.payload = { values: state };\n\nreturn msg;\n",
         "outputs": 1,
@@ -283,8 +332,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
-        "y": 260,
+        "x": 410,
+        "y": 340,
         "wires": [
             [
                 "e207d1a66a7650b9"
@@ -295,14 +344,135 @@
         "id": "e207d1a66a7650b9",
         "type": "http response",
         "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
         "name": "http-get-states-response",
         "statusCode": "",
         "headers": {
             "content-type": "application/json"
         },
-        "x": 630,
-        "y": 260,
+        "x": 640,
+        "y": 340,
         "wires": []
+    },
+    {
+        "id": "f89e2f3dce998039",
+        "type": "http in",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "",
+        "url": "/api/get-states-by-dates/:deviceId",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 400,
+        "wires": [
+            [
+                "197bb63a4e854458"
+            ]
+        ]
+    },
+    {
+        "id": "197bb63a4e854458",
+        "type": "function",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "getStatesByDates",
+        "func": "const [{ Op }, { UserDeviceLinkDataModel, DeviceStateDataModel }, { HttpStatusCodes }] = global.get(['sequelize', 'orm', 'constants']);\nconst { userId } = msg.req.user;\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = msg.req.params.deviceId;\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 400,
+        "wires": [
+            [
+                "fd86f761136a6f0c",
+                "d246a8475b5673ea"
+            ]
+        ]
+    },
+    {
+        "id": "fd86f761136a6f0c",
+        "type": "debug",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "debug 4",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 670,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "d246a8475b5673ea",
+        "type": "http response",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "http-get-states-response",
+        "statusCode": "",
+        "headers": {},
+        "x": 700,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "443b413283d10c89",
+        "type": "function",
+        "z": "2dca6eed12b296f5",
+        "g": "b74b1a6d538c13c2",
+        "name": "postDeviceState",
+        "func": "const [{ Op }, { DeviceDataModel, DeviceStateDataModel, sequelize }] = global.get(['sequelize', 'orm']);\nconst { differenceInMinutes, formatDistance } = global.get('date-fns');\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id', 'updateStateInterval', 'lastStateUpdate'],\n});\n\n\ndevices.forEach(async (d) => {\n    const now = new Date();\n    if (!d.lastStateUpdate || differenceInMinutes(now, d.lastStateUpdate) >= d.updateStateInterval) {\n        const deviceState = global.get(`deviceState${d.id}`);\n\n        if (deviceState) {\n            try {\n                await sequelize.transaction(async t => {\n                    await DeviceStateDataModel.create(\n                        {\n                            deviceId: d.id,\n                            state: JSON.stringify(deviceState)\n                        },\n                        { transaction: t }\n                    );\n\n                    await DeviceDataModel.update(\n                        { lastStateUpdate: now },\n                        {\n                            where: {\n                                id: d.id,\n                            },\n                        },\n                        { transaction: t }\n                    );\n                });\n            } catch (error) {\n                console.log(`The device state update transaction failed due to the error: ${error}`);\n            }\n        }\n    }\n});\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "abf540bef0e1bad8",
+        "type": "inject",
+        "z": "2dca6eed12b296f5",
+        "g": "b74b1a6d538c13c2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 620,
+        "wires": [
+            [
+                "443b413283d10c89"
+            ]
+        ]
     },
     {
         "id": "3254130808eb2f14",
@@ -330,7 +500,7 @@
         "z": "a7c135e772de0725",
         "g": "32c193548f01777e",
         "name": "initState",
-        "func": "const [{ Op }, { FlowDataModel, DeviceDataModel } ] = global.get(['sequelize', 'orm']);\nconst flowUid = node.path.split('/').find(_=> true);\n\nconst params = [\n    [\n        \"startStop\", \"lowLevel\", \"midLevel\",\n        \"hiLevel\", \"emergencyLevel\", \"statePump1\",\n        \"statePump2\", \"resetFaultPump1\", \"resetFaultPump2\",\n        \"resetOperatingTimePump1\", \"resetOperatingTimePump2\",\n        \"faultPump1\", \"faultPump2\"\n    ],\n    [\n        \"timePump1\",\n        \"timePump2\"\n    ]\n];\nconst initialState = {};\n\nflow.set([\"coilsParams\", \"holdingsParams\"], params);\n\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\ndevices.forEach(d => {\n    params.forEach(params => {\n        params.forEach((p, i) => {\n            initialState[p] = undefined;\n        });\n    });\n    \n    flow.set(`state${d.id}`, initialState);\n});\n\nmsg.payload = { message: \"OnInit was completed.\" }\n\nreturn msg;",
+        "func": "const [{ Op }, { FlowDataModel, DeviceDataModel } ] = global.get(['sequelize', 'orm']);\nconst flowUid = node.path.split('/').find(_=> true);\n\nconst params = [\n    [\n        \"startStop\", \"lowLevel\", \"midLevel\",\n        \"hiLevel\", \"emergencyLevel\", \"statePump1\",\n        \"statePump2\", \"resetFaultPump1\", \"resetFaultPump2\",\n        \"resetOperatingTimePump1\", \"resetOperatingTimePump2\",\n        \"faultPump1\", \"faultPump2\"\n    ],\n    [\n        \"timePump1\",\n        \"timePump2\"\n    ]\n];\nconst initialState = {};\n\nflow.set([\"coilsParams\", \"holdingsParams\"], params);\n\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\ndevices.forEach(d => {\n    params.forEach(params => {\n        params.forEach((p, i) => {\n            initialState[p] = undefined;\n        });\n    });\n    \n    global.set(`deviceState${d.id}`, initialState);\n});\n\nmsg.payload = { message: \"OnInit was completed.\" }\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -361,77 +531,6 @@
         "statusType": "auto",
         "x": 540,
         "y": 60,
-        "wires": []
-    },
-    {
-        "id": "f89e2f3dce998039",
-        "type": "http in",
-        "z": "a7c135e772de0725",
-        "g": "3824f75aea35a698",
-        "name": "",
-        "url": "/api/get-states-by-dates/:deviceId",
-        "method": "get",
-        "upload": false,
-        "skipBodyParsing": false,
-        "swaggerDoc": "",
-        "x": 210,
-        "y": 940,
-        "wires": [
-            [
-                "197bb63a4e854458"
-            ]
-        ]
-    },
-    {
-        "id": "197bb63a4e854458",
-        "type": "function",
-        "z": "a7c135e772de0725",
-        "g": "3824f75aea35a698",
-        "name": "getStatesByDates",
-        "func": "const { Op } = global.get(\"sequelize\");\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = msg.req.params.deviceId;\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst { DeviceStateDataModel } = global.get(\"orm\");\n\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 470,
-        "y": 940,
-        "wires": [
-            [
-                "fd86f761136a6f0c",
-                "d246a8475b5673ea"
-            ]
-        ]
-    },
-    {
-        "id": "fd86f761136a6f0c",
-        "type": "debug",
-        "z": "a7c135e772de0725",
-        "g": "3824f75aea35a698",
-        "name": "debug 4",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 660,
-        "y": 900,
-        "wires": []
-    },
-    {
-        "id": "d246a8475b5673ea",
-        "type": "http response",
-        "z": "a7c135e772de0725",
-        "g": "3824f75aea35a698",
-        "name": "http-get-states-response",
-        "statusCode": "",
-        "headers": {},
-        "x": 710,
-        "y": 940,
         "wires": []
     },
     {
@@ -679,7 +778,7 @@
         "z": "a7c135e772de0725",
         "g": "ebdda297932f3f07",
         "name": "collectDeviceState",
-        "func": "\nconst deviceId = flow.get(\"deviceId\");\n\nif (!deviceId) {\n    return;\n}\n\nlet state = flow.get(`state${deviceId}`);\n\nconst updateState = (params) => {\n    params.forEach((p, i) => {\n        const v = {};\n        v[p] = msg.payload[i];\n        state = { ...state, ...v };\n    });\n}\n\nif (msg.topic) {\n    const params = flow.get(`${msg.topic}Params`);\n    updateState(params);\n}\nflow.set(`state${deviceId}`, state);\n\nreturn state;",
+        "func": "\nconst deviceId = flow.get(\"deviceId\");\n\nif (!deviceId) {\n    return;\n}\n\nlet deviceState = global.get(`deviceState${deviceId}`);\n\nconst updateState = (params) => {\n    params.forEach((p, i) => {\n        const v = {};\n        v[p] = msg.payload[i];\n        deviceState = { ...deviceState, ...v };\n    });\n}\n\nif (msg.topic) {\n    const params = flow.get(`${msg.topic}Params`);\n    updateState(params);\n}\nglobal.set(`deviceState${deviceId}`, deviceState);\n\nreturn deviceState;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -691,55 +790,6 @@
         "wires": [
             [
                 "810cdb0a6cb7cff6"
-            ]
-        ]
-    },
-    {
-        "id": "443b413283d10c89",
-        "type": "function",
-        "z": "a7c135e772de0725",
-        "g": "b74b1a6d538c13c2",
-        "name": "postDeviceState",
-        "func": "const { Op } = global.get('sequelize');\nconst { FlowDataModel, DeviceDataModel, DeviceStateDataModel } = global.get('orm');\nconst flowUid = node.path.split('/').find(_ => true);\n\nconst devices = await DeviceDataModel.findAll({\n    attributes: ['id'],\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [],\n        where: {\n            uid: flowUid\n        }\n    }]\n});\n\n\ndevices.forEach(async (d) => {\n    const state = global.get(`state${d.id}`);\n\n    await DeviceStateDataModel.create({\n        deviceId: d.id,\n        state: JSON.stringify(state)\n    });\n});\n\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 400,
-        "y": 500,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "abf540bef0e1bad8",
-        "type": "inject",
-        "z": "a7c135e772de0725",
-        "g": "b74b1a6d538c13c2",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "60",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 150,
-        "y": 500,
-        "wires": [
-            [
-                "443b413283d10c89"
             ]
         ]
     },
@@ -849,7 +899,7 @@
         "z": "a7c135e772de0725",
         "g": "7f7a985047e86ceb",
         "name": "sendDeviceState",
-        "func": "const deviceIndex = flow.get(\"deviceIndex\") || 0;\nconst deviceId = flow.get(\"deviceId\");\nconst state = flow.get(`state${deviceIndex}`);\n\nmsg.payload = {\n    type: \"state\",\n    timestamp: new Date().toISOString(),\n    deviceId: deviceId,\n    value: state,\n};\n\nreturn msg;",
+        "func": "const deviceIndex = flow.get(\"deviceIndex\") || 0;\nconst deviceId = flow.get(\"deviceId\");\nconst deviceState = global.get(`deviceState${deviceIndex}`);\n\nmsg.payload = {\n    type: \"state\",\n    timestamp: new Date().toISOString(),\n    deviceId: deviceId,\n    value: deviceState,\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,

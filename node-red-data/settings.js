@@ -547,6 +547,7 @@ module.exports = {
 
         constants: require('./src/constants'),
         orm: require('./src/orm/models'),
+        'date-fns': require('date-fns'),
     },
 
     /** The maximum number of messages nodes will buffer internally as part of their
