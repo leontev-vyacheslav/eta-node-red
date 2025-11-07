@@ -14,7 +14,7 @@ content-type: application/json
 
 ###
 GET http://127.0.0.1:1880/api/get-devices
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOjEsImlhdCI6MTc2MjQzNzQ2MiwiZXhwIjoxNzYyNTIzODYyfQ.NSobDlPSzwEuisvqEeB6QfLusqtxt1Afdr6y00vp3Y4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVJZCI6MSwiaWF0IjoxNzYyNDk1OTUyLCJleHAiOjE3NjI1ODIzNTJ9.aZHjfbBGXiTME1W_NWTNMTfIQzCOFrf6HJPDz4F8rxw
 
 
 ###

@@ -22,22 +22,7 @@
 process.env.NODE_ENV = 'production';
 process.env.JWT_SECRET = '5840ff8778d33ae4eb010e0c83e1fb25d7ca0ded9119293b4911964744c8b2fa635a66f7c35fe4c1b775f8512d6c9519b08b78863b1d9a0f59861f791b498271';
 
-const http = require('http');
-const jsonwebtoken = require('jsonwebtoken');
-const db = require('./sequelize/models');
-
-http.HttpStatusCode = {
-    OK: 200,
-    Created: 201,
-    NoContent: 204,
-    BadRequest: 400,
-    Unauthorized: 401,
-    Forbidden: 403,
-    NotFound: 404,
-    Conflict: 409,
-    InternalServerError: 500,
-    ServiceUnavailable: 503
-};
+const { authorize } = require('./src/middleware/authorize');
 
 module.exports = {
 
@@ -235,37 +220,9 @@ module.exports = {
      * applied to all http in nodes, or any other sort of common request processing.
      * It can be a single function or an array of middleware functions.
      */
-    httpNodeMiddleware: function (req, res, next) {
-        // Optionally skip our rawBodyParser by setting this to true;
-        //req.skipRawBodyParser = true;
-
-        if (req.path === '/auth/login') {
-            next();
-
-            return;
-        }
-
-        const token = req.headers.authorization?.replace('Bearer ', '');
-
-        if (!token) {
-            return res
-                .status(http.HttpStatusCode.Unauthorized)
-                .json({ error: 'The authorization token wasn\'t found.' });
-        }
-
-        try {
-            const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
-            console.log(decoded);
-
-            req.user = decoded;
-
-            return next();
-        } catch (err) {
-            return res
-                .status(http.HttpStatusCode.Unauthorized)
-                .json({ error: 'The authorization token is invalid.' });
-        }
-    },
+    httpNodeMiddleware: [
+        authorize
+    ],
 
     /** When httpAdminRoot is used to move the UI to a different root path, the
      * following property can be used to identify a directory of static content
@@ -584,11 +541,12 @@ module.exports = {
      *    global.get("os")
      */
     functionGlobalContext: {
-        db: db,
         sequelize: require('sequelize'),
         crypto: require('crypto'),
-        jsonwebtoken: jsonwebtoken,
-        http: http
+        jsonwebtoken: require('jsonwebtoken'),
+
+        constants: require('./src/constants'),
+        db: require('./src/sequelize/models'),
     },
 
     /** The maximum number of messages nodes will buffer internally as part of their

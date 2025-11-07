@@ -6,7 +6,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class UserDeviceLinkDataModel extends Model {
     static associate(models) {
-      UserDeviceLinkDataModel.belongsTo(models.UserDataModel, { foreignKey: 'usderId', as: 'user' });
+      UserDeviceLinkDataModel.belongsTo(models.UserDataModel, { foreignKey: 'userId', as: 'user' });
       UserDeviceLinkDataModel.belongsTo(models.DeviceDataModel, { foreignKey: 'deviceId', as: 'device' });
     }
   }

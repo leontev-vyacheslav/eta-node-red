@@ -8,9 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       DeviceDataModel.belongsTo(models.FlowDataModel, { foreignKey: 'flowId', as: 'flow' });
       DeviceDataModel.hasMany(models.DeviceStateDataModel, { foreignKey: 'deviceId', as: 'states' });
+      DeviceDataModel.hasMany(models.UserDeviceLinkDataModel, { foreignKey: 'deviceId', as: 'userDeviceLinks' });
     }
   }
-  
+
   DeviceDataModel.init({
     name: DataTypes.STRING(32),
     flowId: DataTypes.INTEGER,
