@@ -2,7 +2,7 @@
     {
         "id": "2dca6eed12b296f5",
         "type": "tab",
-        "label": "eta-flow-web-api",
+        "label": "eta-flow-dispatcher",
         "disabled": false,
         "info": "",
         "env": []
@@ -114,12 +114,15 @@
             "e207d1a66a7650b9",
             "f89e2f3dce998039",
             "197bb63a4e854458",
-            "d246a8475b5673ea"
+            "d246a8475b5673ea",
+            "d995a6e870520226",
+            "82bde83f79f43412",
+            "87a20acffb88c509"
         ],
         "x": 34,
-        "y": 259,
-        "w": 882,
-        "h": 202
+        "y": 199,
+        "w": 932,
+        "h": 262
     },
     {
         "id": "d4fc72a987396215",
@@ -257,7 +260,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 150,
-        "y": 300,
+        "y": 240,
         "wires": [
             [
                 "5cb3165ea305cfd7"
@@ -278,7 +281,7 @@
         "finalize": "",
         "libs": [],
         "x": 460,
-        "y": 300,
+        "y": 240,
         "wires": [
             [
                 "8a71ccaa19f8d878"
@@ -294,7 +297,7 @@
         "statusCode": "",
         "headers": {},
         "x": 780,
-        "y": 300,
+        "y": 240,
         "wires": []
     },
     {
@@ -309,7 +312,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 180,
-        "y": 360,
+        "y": 300,
         "wires": [
             [
                 "be8e1b2521c879ee"
@@ -322,7 +325,7 @@
         "z": "2dca6eed12b296f5",
         "g": "41c82c569adc9a0c",
         "name": "get-device-state",
-        "func": "const { userId } = msg.req.user;\nconst deviceId = msg.req.params.deviceId;\nconst [{ UserDeviceLinkDataModel }, { HttpStatusCodes }] = global.get(['orm', 'app-consts']);\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\nconst state = global.get(`state${deviceId}`);\nif (!state) {\n    msg.statusCode = HttpStatusCodes.InternalServerError;\n    msg.payload = { error: `The device state for the device with ID: ${deviceId}) was'n found` }\n\n    return msg;\n}\n\nmsg.payload = { values: state };\n\nreturn msg;\n",
+        "func": "const { userId } = msg.req.user;\nconst deviceId = parseInt(msg.req.params.deviceId);\nconst [{ UserDeviceLinkDataModel }, { HttpStatusCodes }] = global.get(['orm', 'app-consts']);\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\nconst state = global.get(`state${deviceId}`);\nif (!state) {\n    msg.statusCode = HttpStatusCodes.InternalServerError;\n    msg.payload = { error: `The device state for the device with ID: ${deviceId}) was'n found` }\n\n    return msg;\n}\n\nmsg.payload = { values: state };\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -330,7 +333,7 @@
         "finalize": "",
         "libs": [],
         "x": 470,
-        "y": 360,
+        "y": 300,
         "wires": [
             [
                 "e207d1a66a7650b9"
@@ -348,7 +351,7 @@
             "content-type": "application/json"
         },
         "x": 780,
-        "y": 360,
+        "y": 300,
         "wires": []
     },
     {
@@ -363,7 +366,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 210,
-        "y": 420,
+        "y": 360,
         "wires": [
             [
                 "197bb63a4e854458"
@@ -376,7 +379,7 @@
         "z": "2dca6eed12b296f5",
         "g": "41c82c569adc9a0c",
         "name": "get-device-states-by-dates",
-        "func": "const [{ Op }, { UserDeviceLinkDataModel, DeviceStateDataModel }, { HttpStatusCodes }] = global.get(['sequelize', 'orm', 'app-consts']);\nconst { userId } = msg.req.user;\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = msg.req.params.deviceId;\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
+        "func": "const [{ Op }, { UserDeviceLinkDataModel, DeviceStateDataModel }, { HttpStatusCodes }] = global.get(['sequelize', 'orm', 'app-consts']);\nconst { userId } = msg.req.user;\n\nconst beginDateStr = msg.req.query.beginDate;\nconst endDateStr = msg.req.query.endDate;\nconst deviceId = parseInt(msg.req.params.deviceId);\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\n\nconst beginDate = new Date(beginDateStr);\nconst endDate = new Date(endDateStr);\n\nconst states = await DeviceStateDataModel.findAll({\n    where: {\n        deviceId: deviceId,\n        createdAt: {\n            [Op.between]: [beginDate, endDate]\n        },\n    },\n});\n\n\nmsg.payload = { values: states };\n\nreturn msg;\n\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -384,7 +387,7 @@
         "finalize": "",
         "libs": [],
         "x": 510,
-        "y": 420,
+        "y": 360,
         "wires": [
             [
                 "d246a8475b5673ea"
@@ -400,7 +403,7 @@
         "statusCode": "",
         "headers": {},
         "x": 780,
-        "y": 420,
+        "y": 360,
         "wires": []
     },
     {
@@ -451,6 +454,58 @@
                 "443b413283d10c89"
             ]
         ]
+    },
+    {
+        "id": "d995a6e870520226",
+        "type": "http in",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "",
+        "url": "/api/get-mnemoschema/:deviceId",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 210,
+        "y": 420,
+        "wires": [
+            [
+                "82bde83f79f43412"
+            ]
+        ]
+    },
+    {
+        "id": "82bde83f79f43412",
+        "type": "function",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "get-mnemoschema",
+        "func": "const [{ promises: fs }, path] = global.get(['fs', 'path']);\nconst [{ UserDeviceLinkDataModel, DeviceDataModel, FlowDataModel }, { HttpStatusCodes }]\n    = global.get(['orm', 'app-consts']);\n\nconst { userId } = msg.req.user;\nconst deviceId = parseInt(msg.req.params.deviceId);\n\nconst userDeviceLink = await UserDeviceLinkDataModel.findOne({\n    where: {\n        userId,\n        deviceId\n    }\n});\n\nif (!userDeviceLink) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: `The requested device doesn\\'t belong to user with ID ${userId}` }\n\n    return msg;\n}\n\nconst mnemoschemasPath = path.join('/data/static', 'mnemoschemas');\nconst files = await fs.readdir(mnemoschemasPath);\nconst device = await DeviceDataModel.findOne({\n    attributes: [\"id\"],\n    where: {\n        id: deviceId,\n    },\n    include: [{\n        model: FlowDataModel,\n        as: 'flow',\n        attributes: [\"uid\"],\n    }],\n});\n\n\nconst mnemoschemaPathInfo = files.map(file => {\n    const fileNameWithoutExt = path.basename(file, path.extname(file));\n    const flowUid = fileNameWithoutExt.split('-').pop();\n\n    return {\n        file,\n        flowUid\n    };\n}).find(f => f.flowUid === device.flow.uid);\n\nif (!mnemoschemaPathInfo) {\n    msg.statusCode = HttpStatusCodes.NotFound;\n    msg.payload = { error: `The mnemoschema wasn't found for the device with ID ${deviceId}` }\n\n    return msg;\n}\n\nconsole.log(mnemoschemaPathInfo);\n\nlet mnemoschemaSvgContent;\ntry {\n    mnemoschemaSvgContent = await fs.readFile(path.join(mnemoschemasPath, mnemoschemaPathInfo.file), 'utf8');\n} catch (error) {\n    msg.statusCode = HttpStatusCodes.InternalServerError;\n    msg.payload = { error }\n\n    return msg;\n}\n\nmsg.headers = {\n    'Content-Type': 'image/svg+xml'\n};\nmsg.payload = mnemoschemaSvgContent;\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 420,
+        "wires": [
+            [
+                "87a20acffb88c509"
+            ]
+        ]
+    },
+    {
+        "id": "87a20acffb88c509",
+        "type": "http response",
+        "z": "2dca6eed12b296f5",
+        "g": "41c82c569adc9a0c",
+        "name": "http-get-mnemoschema-response",
+        "statusCode": "",
+        "headers": {},
+        "x": 800,
+        "y": 420,
+        "wires": []
     },
     {
         "id": "3254130808eb2f14",
