@@ -25,6 +25,6 @@ POST  http://127.0.0.1:1880/sign-in/
 content-type: application/json
 
 {
-    "name": "leo",
+    "login": "leo",
     "password": "0987654321"
 }

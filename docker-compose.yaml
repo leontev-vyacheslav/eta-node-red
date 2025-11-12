@@ -1,31 +1,31 @@
 services:
-  node-red-app:
+  eta-flow-space:
     image: nodered/node-red:latest
-    container_name: node-red-app
+    container_name: eta-flow-space
     ports:
       - "1880:1880"
     volumes:
-      - ./node-red-data:/data
+      - ./flow-space:/data
     restart: unless-stopped
     environment:
       - TZ=Russia/Moscow
     networks:
-      - node-red-network
+      - eta-flow-space-network
 
-  node-red-database:
+  eta-flow-space-database:
     image: postgres:latest
-    container_name: node-red-database
+    container_name: eta-flow-space-database
     ports:
       - "35432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=0987654321
-      - POSTGRES_DB=eta_nodered_db
+      - POSTGRES_DB=eta_flow_space_database
     volumes:
-      - ./database-data:/var/lib/postgresql/data
+      - ./flow-space-data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-        - node-red-network
+        - eta-flow-space-network
 
 networks:
-  node-red-network:
+  eta-flow-space-network:

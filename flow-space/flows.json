@@ -120,7 +120,7 @@
             "87a20acffb88c509"
         ],
         "x": 34,
-        "y": 199,
+        "y": 279,
         "w": 932,
         "h": 262
     },
@@ -136,12 +136,15 @@
         "nodes": [
             "cc420d657eea3b6f",
             "7fedb0406dc884b3",
-            "281282e423102908"
+            "281282e423102908",
+            "ae53f3a719dc646f",
+            "93590fb695220b2f",
+            "0c78d8dd9d12fd1e"
         ],
         "x": 34,
         "y": 59,
         "w": 852,
-        "h": 82
+        "h": 142
     },
     {
         "id": "b74b1a6d538c13c2",
@@ -156,7 +159,7 @@
             "abf540bef0e1bad8"
         ],
         "x": 34,
-        "y": 579,
+        "y": 599,
         "w": 632,
         "h": 82
     },
@@ -221,7 +224,7 @@
         "z": "2dca6eed12b296f5",
         "g": "d4fc72a987396215",
         "name": "sign-in",
-        "func": "const [jwt, { createHash }, { UserDataModel }, { HttpStatusCodes }] = global.get(['jsonwebtoken', 'crypto', 'orm', 'app-consts']);\nconst { name, password } = msg.payload;\n\nconst hashedPassword = createHash('sha256').update(password).digest('base64');\n\nconst user = await UserDataModel.findOne({\n    where: {\n        name: name,\n        password: hashedPassword\n    }\n});\n\nif (!user) {\n    msg.statusCode = HttpStatusCodes.Unauthorized;\n    msg.payload = { error: 'The user wasn\\'t found or the password was wrong.' }\n\n    return msg;\n}\n\nconst JWT_SECRET = env.get('JWT_SECRET');\nif (!JWT_SECRET) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: 'JWT_SECRET wasn\\'t found.' }\n\n    return msg;\n}\n\nconst token = jwt.sign(\n    { userId: user.id, roleId: user.roleId },\n    JWT_SECRET,\n    { expiresIn: '24h' }\n);\n\nmsg.statusCode = HttpStatusCodes.OK;\nmsg.payload = {\n    token,\n    user: {\n        id: user.id,\n        name: user.name,\n        roleId: user.roleId\n    }\n};\n\nreturn msg;",
+        "func": "const [jwt, { createHash }, { UserDataModel }, { HttpStatusCodes }] = global.get(['jsonwebtoken', 'crypto', 'orm', 'app-consts']);\nconst { login, password } = msg.payload;\n\nconst hashedPassword = createHash('sha256').update(password).digest('base64');\n\nconst user = await UserDataModel.findOne({\n    where: {\n        name: login,\n        password: hashedPassword\n    }\n});\n\nif (!user) {\n    msg.statusCode = HttpStatusCodes.Unauthorized;\n    msg.payload = { error: 'The user wasn\\'t found or the password was wrong.' }\n\n    return msg;\n}\n\nconst JWT_SECRET = env.get('JWT_SECRET');\nif (!JWT_SECRET) {\n    msg.statusCode = HttpStatusCodes.Forbiden;\n    msg.payload = { error: 'JWT_SECRET wasn\\'t found.' }\n\n    return msg;\n}\n\nconst token = jwt.sign(\n    { userId: user.id, roleId: user.roleId },\n    JWT_SECRET,\n    { expiresIn: '24h' }\n);\n\nmsg.statusCode = HttpStatusCodes.OK;\nmsg.payload = {\n    token,\n    login: user.name,\n    role: user.roleId\n    \n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -260,7 +263,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 150,
-        "y": 240,
+        "y": 320,
         "wires": [
             [
                 "5cb3165ea305cfd7"
@@ -281,7 +284,7 @@
         "finalize": "",
         "libs": [],
         "x": 460,
-        "y": 240,
+        "y": 320,
         "wires": [
             [
                 "8a71ccaa19f8d878"
@@ -297,7 +300,7 @@
         "statusCode": "",
         "headers": {},
         "x": 780,
-        "y": 240,
+        "y": 320,
         "wires": []
     },
     {
@@ -312,7 +315,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 180,
-        "y": 300,
+        "y": 380,
         "wires": [
             [
                 "be8e1b2521c879ee"
@@ -333,7 +336,7 @@
         "finalize": "",
         "libs": [],
         "x": 470,
-        "y": 300,
+        "y": 380,
         "wires": [
             [
                 "e207d1a66a7650b9"
@@ -351,7 +354,7 @@
             "content-type": "application/json"
         },
         "x": 780,
-        "y": 300,
+        "y": 380,
         "wires": []
     },
     {
@@ -366,7 +369,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 210,
-        "y": 360,
+        "y": 440,
         "wires": [
             [
                 "197bb63a4e854458"
@@ -387,7 +390,7 @@
         "finalize": "",
         "libs": [],
         "x": 510,
-        "y": 360,
+        "y": 440,
         "wires": [
             [
                 "d246a8475b5673ea"
@@ -403,7 +406,7 @@
         "statusCode": "",
         "headers": {},
         "x": 780,
-        "y": 360,
+        "y": 440,
         "wires": []
     },
     {
@@ -420,7 +423,7 @@
         "finalize": "",
         "libs": [],
         "x": 510,
-        "y": 620,
+        "y": 640,
         "wires": [
             []
         ]
@@ -448,7 +451,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 170,
-        "y": 620,
+        "y": 640,
         "wires": [
             [
                 "443b413283d10c89"
@@ -467,7 +470,7 @@
         "skipBodyParsing": false,
         "swaggerDoc": "",
         "x": 210,
-        "y": 420,
+        "y": 500,
         "wires": [
             [
                 "82bde83f79f43412"
@@ -488,7 +491,7 @@
         "finalize": "",
         "libs": [],
         "x": 490,
-        "y": 420,
+        "y": 500,
         "wires": [
             [
                 "87a20acffb88c509"
@@ -504,7 +507,59 @@
         "statusCode": "",
         "headers": {},
         "x": 800,
-        "y": 420,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "ae53f3a719dc646f",
+        "type": "http in",
+        "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
+        "name": "",
+        "url": "/api/auth-check",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "93590fb695220b2f"
+            ]
+        ]
+    },
+    {
+        "id": "93590fb695220b2f",
+        "type": "function",
+        "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
+        "name": "auth-check",
+        "func": "const [{ HttpStatusCodes }] = global.get(['app-consts']);\n\nmsg.statusCode = HttpStatusCodes.OK;\nmsg.payload = {\n    message: 'The user is authenticated.'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 160,
+        "wires": [
+            [
+                "0c78d8dd9d12fd1e"
+            ]
+        ]
+    },
+    {
+        "id": "0c78d8dd9d12fd1e",
+        "type": "http response",
+        "z": "2dca6eed12b296f5",
+        "g": "d4fc72a987396215",
+        "name": "http-auth-check-response",
+        "statusCode": "",
+        "headers": {},
+        "x": 720,
+        "y": 160,
         "wires": []
     },
     {

@@ -1,4 +1,4 @@
-import { UserRoleModel } from './enums/user-role-model';
+import type { UserRoleModel } from './enums/user-role-model';
 
 export type AuthUserModel = {
   role: UserRoleModel;

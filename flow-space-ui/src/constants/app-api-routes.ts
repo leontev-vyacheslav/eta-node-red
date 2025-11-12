@@ -3,7 +3,7 @@ export default {
 
     accountSignIn: '/sign-in',
     accountSignOut: '/sign-out',
-    accountAuthCheck: '/auth-check',
 
+    authCheck: '/api/auth-check',
     quickHelpReference: '/api/quick-help-references',
 };

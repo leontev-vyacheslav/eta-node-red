@@ -47,7 +47,7 @@ function AuthProvider (props: AppBaseProviderProps) {
                 `${routes.host}${routes.accountSignIn}`, signIn
             );
 
-            if (response && response.status === HttpConstants.StatusCodes.Created && response.data) {
+            if (response && response.status === HttpConstants.StatusCodes.Ok && response.data) {
                 userAuthData = response.data;
                 if (userAuthData) {
                     localStorage.setItem('@userAuthData', JSON.stringify(userAuthData));

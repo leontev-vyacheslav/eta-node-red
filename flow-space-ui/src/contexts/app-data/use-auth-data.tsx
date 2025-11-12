@@ -16,7 +16,7 @@ export const useAuthData = () => {
 
     const getAuthCheckDataAsync = useCallback<GetAuthCheckDataAsyncFunc>(async (): Promise<MessageModel | null> => {
         const response = await authHttpRequest({
-            url: `${routes.host}${routes.accountAuthCheck}`,
+            url: `${routes.host}${routes.authCheck}`,
             method: HttpConstants.Methods.Get as Method,
         }, true);
 
