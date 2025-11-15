@@ -1,13 +1,10 @@
 import type { DescriptiveBaseModel } from "../abstractions/descriptive-base-model";
 import type { EntityModel } from "../abstractions/entity-base-model";
 import type { TimestampBaseModel } from "../abstractions/timestamp-base-model";
+import type { DeviceModel } from "./device-model";
 
-export interface DeviceModel extends EntityModel, DescriptiveBaseModel, TimestampBaseModel {
-    flowId: number;
+export interface FlowModel extends EntityModel, DescriptiveBaseModel, TimestampBaseModel {
+    uid: string;
 
-    settings: object;
-
-    updateStateInterval: number;
-
-    lastStateUpdate: Date;
+    devices: DeviceModel[];
 }

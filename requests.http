@@ -1,11 +1,33 @@
-GET http://127.0.0.1:1880/api/get-state/1
+@baseUrl = http://127.0.0.1:1880
 
 ###
-GET http://127.0.0.1:1880/api/get-states-by-dates/1?beginDate=2025-10-31T00:00:00&endDate=2025-10-31T23:59:59
+@authToken = {{signIn.response.body.token}}
 
 ###
-POST http://127.0.0.1:1880/api/set-state/3  HTTP/1.1
+# @name signIn
+POST {{baseUrl}}/sign-in/
 content-type: application/json
+
+{
+    "login": "leo",
+    "password": "0987654321"
+}
+
+###
+# @name getDeviceState
+GET {{baseUrl}}/api/states/device/1
+Authorization: Bearer {{authToken}}
+
+###
+# @name getDeviceStatesByDateRange
+GET {{baseUrl}}/api/states/device/1/dates?beginDate=2025-10-31T00:00:00&endDate=2025-10-31T23:59:59
+Authorization: Bearer {{authToken}}
+
+###
+# @name postDeviceStateValue
+POST {{baseUrl}}/api/states/3  HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
     "address": 7,
@@ -13,18 +35,16 @@ content-type: application/json
 }
 
 ###
-GET http://127.0.0.1:1880/api/get-devices
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVJZCI6MSwiaWF0IjoxNzYyNzUzMzYzLCJleHAiOjE3NjI4Mzk3NjN9.Yq6tRURCsh85eR1eKHbC-uHt2OLQO1thkesSgiBcymo
+# @name getDevices
+GET {{baseUrl}}/api/devices
+Authorization: Bearer {{authToken}}
 
 ###
-GET http://127.0.0.1:1880/api/get-mnemoschema/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVJZCI6MSwiaWF0IjoxNzYyNzUzMzYzLCJleHAiOjE3NjI4Mzk3NjN9.Yq6tRURCsh85eR1eKHbC-uHt2OLQO1thkesSgiBcymo
+# @name getFlows
+GET {{baseUrl}}/api/flows
+Authorization: Bearer {{authToken}}
 
 ###
-POST  http://127.0.0.1:1880/sign-in/
-content-type: application/json
-
-{
-    "login": "leo",
-    "password": "0987654321"
-}
+# @name getMnemoschema
+GET {{baseUrl}}/api/mnemoschemas/device/1
+Authorization: Bearer {{authToken}}

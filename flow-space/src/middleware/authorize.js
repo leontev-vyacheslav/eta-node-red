@@ -2,7 +2,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const { HttpStatusCodes } = require('../constants/http');
 
 function authorize(req, res, next) {
-    if (!req.path.startsWith('/api/')) {
+    if (!req.path.startsWith('/api/') && !req.path === '/health-check') {
         next();
 
         return;

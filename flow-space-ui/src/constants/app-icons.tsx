@@ -34,11 +34,7 @@ export { IoCloseCircleOutline as CloseCircleIcon } from 'react-icons/io5';
 
 export { RiFileExcel2Line as ExportToXlsxIcon } from 'react-icons/ri';
 export { MdMailOutline as EmailIcon } from 'react-icons/md';
-export { RiBatteryLine as LowPowerModeEnabledIcon } from 'react-icons/ri';
-export { RiBatteryChargeLine as LowPowerModeDisabledIcon } from 'react-icons/ri';
-export { RiBatteryLowLine as BatteryLevelIcon } from 'react-icons/ri';
-export { IoMdBatteryCharging as ChargingLevelIcon } from 'react-icons/io';
-export { IoBatteryChargingOutline as BatteryIcon } from 'react-icons/io5';
+
 export { MdErrorOutline as ErrorIcon } from 'react-icons/md';
 export { VscDebug as DebugIcon } from 'react-icons/vsc';
 export { IoEllipsisHorizontal as ExtensionIcon } from 'react-icons/io5';
@@ -79,16 +75,6 @@ export { RxArchive as ArchivesIcon } from 'react-icons/rx';
 export { IoMdKey as AccessTokenIcon } from 'react-icons/io';
 export { IoIosLock as LockIcon } from 'react-icons/io';
 
-export { IoEllipseSharp as SupplyPipeChartSingIcon } from 'react-icons/io5';
-export { IoSquareSharp as ReturnPipeChartSingIcon } from 'react-icons/io5';
-export { IoTriangleSharp as OutdoorChartSingIcon } from 'react-icons/io5';
-export { IoTimeSharp as TimeChartSingIcon } from 'react-icons/io5';
-export { IoCloseSharp as CalculatedSupplyPipeChartSingIcon } from 'react-icons/io5';
-
-export { MdOutlineLayers as HeatingCircuitMnemoschemaIcon } from 'react-icons/md';
-export { MdOutlineTextsms as HeatingCircuitCodeIcon } from 'react-icons/md';
-
-export { IoTimerOutline as RelaunchIcon } from 'react-icons/io5';
 
 export { MdOutlineAutoGraph as AutoWholeRange } from 'react-icons/md';
 export { MdOutlineShowChart as DefaultWholeRange } from 'react-icons/md';
@@ -96,12 +82,10 @@ export { MdOutlineShowChart as DefaultWholeRange } from 'react-icons/md';
 export { MdOutlineLiveHelp as HelpIcon } from 'react-icons/md';
 export { IoEyeOutline as ViewIcon } from 'react-icons/io5';
 
-export { MdStackedLineChart as TempGraphCalcValuesViewIcon } from 'react-icons/md';
-export { MdShowChart as TempGraphFactValuesViewIcon } from 'react-icons/md';
 export { IoCheckmark as CheckIcon } from 'react-icons/io5';
 
-export {  TbPlugConnected  as RemoteConnectorsIcon } from 'react-icons/tb';
-export {  MdOutlineRestartAlt  as RestartIcon } from 'react-icons/md';
+
+export { IoAppsSharp as FlowIcon } from 'react-icons/io5';
 
 
 

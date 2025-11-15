@@ -13,7 +13,9 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   DeviceDataModel.init({
+    code: DataTypes.STRING(32),
     name: DataTypes.STRING(32),
+    description: DataTypes.STRING(32),
     flowId: DataTypes.INTEGER,
     settings: DataTypes.JSON,
     updateStateInterval: DataTypes.INTEGER,

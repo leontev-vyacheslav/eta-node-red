@@ -9,8 +9,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      code: {
+         type: Sequelize.STRING(32),
+      },
       name: {
         type: Sequelize.STRING(32),
+      },
+      description: {
+        type: Sequelize.STRING(64),
       },
       flowId: {
         type: Sequelize.INTEGER,

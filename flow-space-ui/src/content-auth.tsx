@@ -5,16 +5,16 @@ import { SideNavOuterToolbar as SideNavBarLayout } from './layouts';
 import { Footer } from './components';
 import AppConstants from './constants/app-constants';
 import { NotFoundPage } from './pages/not-found-page/not-found-page';
-import { useAuthData } from './contexts/app-data/use-auth-data';
+import { useAuthData } from './contexts/app-data/use-health-data';
 
 const ContentAuth = () => {
-    const { getAuthCheckDataAsync } = useAuthData();
+    const { getHealthCheckDataAsync } = useAuthData();
 
     useEffect(() => {
         (async () => {
-            await getAuthCheckDataAsync();
+            await getHealthCheckDataAsync();
         })();
-    }, [getAuthCheckDataAsync]);
+    }, [getHealthCheckDataAsync]);
 
     return (
         <>

@@ -5,18 +5,18 @@ import { useAuthHttpRequest } from './use-auth-http-request';
 import routes from '../../constants/app-api-routes';
 import type { MessageModel } from '../../models/message-model';
 
-export type GetAuthCheckDataAsyncFunc = () => Promise<MessageModel | null>;
+export type GetHealthCheckDataAsyncFunc = () => Promise<MessageModel | null>;
 
-export type AppDataContextAuthCheckEndpointsModel = {
-    getAuthCheckDataAsync: GetAuthCheckDataAsyncFunc;
+export type AppDataContextHealthCheckEndpointsModel = {
+    getHealthCheckDataAsync: GetHealthCheckDataAsyncFunc;
 }
 
 export const useAuthData = () => {
     const authHttpRequest = useAuthHttpRequest();
 
-    const getAuthCheckDataAsync = useCallback<GetAuthCheckDataAsyncFunc>(async (): Promise<MessageModel | null> => {
+    const getHealthCheckDataAsync = useCallback<GetHealthCheckDataAsyncFunc>(async (): Promise<MessageModel | null> => {
         const response = await authHttpRequest({
-            url: `${routes.host}${routes.authCheck}`,
+            url: `${routes.host}${routes.healthCheck}`,
             method: HttpConstants.Methods.Get as Method,
         }, true);
 
@@ -29,6 +29,6 @@ export const useAuthData = () => {
     }, [authHttpRequest]);
 
     return {
-        getAuthCheckDataAsync
+        getHealthCheckDataAsync
     };
 }

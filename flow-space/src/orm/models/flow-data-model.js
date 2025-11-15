@@ -9,7 +9,9 @@ module.exports = (sequelize, DataTypes) => {
 
   FlowDataModel.init(
     {
+      code: DataTypes.STRING(32),
       name: DataTypes.STRING(32),
+      description: DataTypes.STRING(32),
       uid: DataTypes.STRING(16),
     },
     {

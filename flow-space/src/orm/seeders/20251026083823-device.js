@@ -7,7 +7,9 @@ module.exports = {
       "device",
       [
         {
-          name: "pumping-monitor-1",
+          code: "pumping-monitor-1",
+          name: 'ГИМС',
+          description: 'Общественное пространство ГИМС',
           flowId: 1,
           settings: JSON.stringify({ ip: "192.168.0.200", port: 502 }),
           updateStateInterval: 1,
@@ -16,7 +18,9 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          name: "pumping-monitor-2",
+          code: "pumping-monitor-2",
+          name: 'КНС-1',
+          description: 'Кремлевская набережная, КНС-1',
           flowId: 1,
           settings: JSON.stringify({ ip: "192.168.0.200", port: 522 }),
           updateStateInterval: 2,
@@ -25,7 +29,9 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          name: "pumping-monitor-3",
+          code: "pumping-monitor-3",
+          name: 'КНС-2',
+          description: 'Кремлевская набережная, КНС-2',
           flowId: 1,
           settings: JSON.stringify({ ip: "192.168.0.200", port: 532 }),
           updateStateInterval: 3,

@@ -4,6 +4,11 @@ export default {
     accountSignIn: '/sign-in',
     accountSignOut: '/sign-out',
 
-    authCheck: '/api/auth-check',
+    healthCheck: '/health-check',
+
     quickHelpReference: '/api/quick-help-references',
+    flows: '/api/flows',
+    devices: '/api/devices',
+    states: '/api/states',
+    mnemoschemas: '/api/mnemoschemas'
 };

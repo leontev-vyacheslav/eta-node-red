@@ -16,7 +16,7 @@ const useSharedArea = () => useContext(SharedAreaContext);
 function SharedAreaProvider(props: AppBaseProviderProps) {
     const { children } = props;
     const { signOut } = useAuth();
-    const treeViewRef = useRef<TreeView<TreeViewItemModel>>();
+    const treeViewRef = useRef<TreeView<TreeViewItemModel>>(null);
 
     const signOutWithConfirm = useCallback<ProcFunc>(() => {
         const confirmSignOutContent = () => {

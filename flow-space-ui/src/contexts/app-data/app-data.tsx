@@ -1,32 +1,28 @@
 import { createContext, useContext } from 'react';
 import type { AppBaseProviderProps } from '../../models/app-base-provider-props';
-import { type AppDataContextAuthCheckEndpointsModel, useAuthData } from './use-auth-data';
-import { type AppDataContextAccountsEndpointsModel, useAccountsData } from './use-accounts-data';
+import { type AppDataContextHealthCheckEndpointsModel, useAuthData } from './use-health-data';
 import { type AppDataContextQuickHelpRefernceEndpointsModel, useQuickHelpRefernceData } from './use-quick-help-reference-data';
-import { type AppDataContextServicesEndpointsModel, useServicesData } from './use-services-data';
+import { useFlowData, type AppDataContextFlowEndpointsModel } from './flows/use-flow-data';
 
 export type AppDataContextModel =
-    & AppDataContextAuthCheckEndpointsModel
-    & AppDataContextAccountsEndpointsModel
+    & AppDataContextHealthCheckEndpointsModel
     & AppDataContextQuickHelpRefernceEndpointsModel
-    & AppDataContextServicesEndpointsModel;
+    & AppDataContextFlowEndpointsModel;
 
 const AppDataContext = createContext<AppDataContextModel>({} as AppDataContextModel);
 const useAppData = () => useContext(AppDataContext);
 
 function AppDataProvider(props: AppBaseProviderProps) {
     const auth = useAuthData();
-    const accounts = useAccountsData();
     const quickHelpRefernce = useQuickHelpRefernceData();
-    const services = useServicesData();
+    const flow = useFlowData();
 
     return (
         <AppDataContext.Provider
             value={{
                 ...auth,
-                ...accounts,
                 ...quickHelpRefernce,
-                ...services
+                ...flow
             }}
             {...props}
         />

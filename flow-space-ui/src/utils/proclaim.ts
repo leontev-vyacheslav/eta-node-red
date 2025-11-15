@@ -5,21 +5,33 @@ import type { MessageModel } from '../models/message-model';
 
 
 export function proclaim(options: any) {
+    const toastStack = document.querySelector('.dx-toast-stack');
+    if(toastStack) {
+        const toastsChangeHandlerElements = document.querySelectorAll('.dx-visibility-change-handler.dx-toast');
+
+        if (toastsChangeHandlerElements) {
+            Array.from(toastsChangeHandlerElements).forEach(element => {
+                element.remove();
+            })
+        }
+        toastStack.innerHTML = '';
+    }
+
     notify({
-        width: devices.current().phone ? '100%' : undefined,
+        ...options,
+        width: devices.current().phone ? '90%' : undefined,
         position: devices.current().phone ? 'bottom center' : {
             at: 'bottom right',
             my: 'bottom right',
             offset: '-20 -20'
-        },
-        ...options,
+        }
     }, {
         position: 'bottom center',
         direction: 'up-push'
     });
 }
 
-export async function proclaimError(error: unknown) {
+export async function  proclaimError(error: unknown) {
     let errorMessage = (error as AxiosError).message;
 
     if ((error as AxiosError).response && (error as AxiosError).response?.data) {
@@ -32,10 +44,11 @@ export async function proclaimError(error: unknown) {
     }
 
     errorMessage = !errorMessage ? (error as AxiosError).message : errorMessage;
-
+    if (errorMessage === 'Network Error') {
+        errorMessage = 'Сетевая ошибка. Отсутствует связь с сервером или сетевое соединение.'
+    }
     proclaim({
         type: 'error',
         message: errorMessage,
-        // displayTime: 30000000,
     });
 }

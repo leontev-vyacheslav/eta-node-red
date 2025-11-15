@@ -5,7 +5,7 @@ import type { TreeViewItemModel } from './tree-view-item';
 
 export type SharedAreaContextModel = {
   signOutWithConfirm: ProcFunc;
-  treeViewRef: RefObject<TreeView<TreeViewItemModel>>;
+  treeViewRef: RefObject<TreeView<TreeViewItemModel> | null>;
   showLoader: ProcFunc;
   hideLoader: ProcFunc;
   // disposedTimerDispatcher: MutableRefObject<DisposedTimersDispatcher>;
